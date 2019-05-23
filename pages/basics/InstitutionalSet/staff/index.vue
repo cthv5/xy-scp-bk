@@ -88,7 +88,7 @@ export default {
             width: 150
           },
           {
-            title: '学历',
+            title: '学历2',
             dataIndex: 'employeeDegree',
             key: 'employeeDegree',
             width: 150
