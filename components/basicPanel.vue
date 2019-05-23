@@ -1,11 +1,11 @@
 <template lang="pug">
 a-layout
-  a-layout-sider.border-right-line.bg-f9(v-if="leftSider", width="250", collapsible, :collapsedWidth="0", v-model="collapsed")
+  a-layout-sider.border-right-line.bg-f9(v-if="basicPanel.leftSider", width="250", collapsible, :collapsedWidth="0", v-model="collapsed")
     .flex.flex-center.p-10
-      .col {{leftSider.title}}
+      .col {{basicPanel.leftSider.title}}
       a-icon.trigger(:type="collapsed ? 'menu-unfold' : 'menu-fold'", @click="collapsedHandler")
     .bg-white.p-10.sider-content-height
-      template(v-if="leftSider.type === 'tree'")
+      template(v-if="basicPanel.leftSider.type === 'tree'")
         .flex.flex-center.flex-content-between.mt-10
           a-button(icon="plus", size="small") 增加
           a-button(icon="edit", size="small") 修改
@@ -19,27 +19,32 @@ a-layout
             a-tree-node(title="parent 1", key="0-1")
               a-tree-node(title="leaf 1-0", key="0-1-0", isLeaf)
               a-tree-node(title="leaf 1-0", key="0-1-1", isLeaf)
-      template(v-else-if="leftSider.type === 'search'")
+      template(v-else-if="basicPanel.leftSider.type === 'search'")
         a-form
-          a-form-item(v-for="item in leftSider.formItem", :key="item.lbl", :label="item.lbl", :label-col="item.lblCol ? item.lblCol : {span: 8}", :wrapper-col="item.wrapperCol ? item.wrapperCol : {span: 16}")
+          a-form-item(v-for="item in basicPanel.leftSider.formItem", :key="item.lbl", :label="item.lbl", :label-col="item.lblCol ? item.lblCol : {span: 8}", :wrapper-col="item.wrapperCol ? item.wrapperCol : {span: 16}")
             a-input(:type="item.type ? item.type : 'text'")
         a-button-group.flex.flex-content-center
           a-button(type="primary", icon="search") 查询
           a-button(icon="reload") 重置
   a-layout-content.p-10.bg-white.box-sizing
-    .flag-panel(v-if="buttonGroup")
+    .flag-panel(v-if="basicPanel.buttonGroup")
       a-button-group
-        template(v-for="item in buttonGroup")
+        template(v-for="item in basicPanel.buttonGroup")
           a-popconfirm(v-if="item.popconfirm", :title="item.popconfirm.title", :visible="delConfirmShow" @confirm="confirm", @cancel="cancel", okText="确认", cancelText="取消")
             a-button(:icon="item.icon", type="primary", @click="showModal(item)") {{item.text}}
           a-button(v-else, :icon="item.icon", type="primary", @click="showModal(item)") {{item.text}}          
     .content.mt-15(ref="content")
-      a-table(size="small", :scroll="panelScroll ? panelScroll : scroll", :rowSelection="{type: 'radio', fixed:true, selectedRowKeys: selectedRowKeys, onChange: onSelectChange}", :pagination="pagination" :columns="columns", :dataSource="data", bordered, :rowKey="rowKey")        
+      a-table(size="small", :scroll="basicPanel.panelScroll ? basicPanel.panelScroll : scroll", :rowSelection="{type: basicPanel.rowSelection.type, columnWidth:40, fixed:true, selectedRowKeys: selectedRowKeys, onChange: onSelectChange}", :pagination="pagination" :columns="basicPanel.columns", :dataSource="basicPanel.data", bordered, :rowKey="basicPanel.rowKey")      
+        template(v-for="col in dataIndexList", :slot="col", slot-scope="text, record, index")
+          div(:key="col")
+            a-input(:value="text", style="margin: -5px 0", v-if="editCol === col && editIdx === index")
+            template(v-else) 
+              .full-width(@click="tableClick(text, record, index)", @dblclick="dbTableClick(col, record, index)") {{text}}
       //- a-pagination.mt-10(:itemRender="itemRender", :defaultCurrent="pagination.current", :defaultPageSize="pagination.pageSize", showSizeChanger, showQuickJumper, :total="pagination.total", :showTotal="total => `共 ${total} 条数据`")
   a-modal(:title="titleModal", :width="1100", :visible="modalShow", @ok="handleOk", :confirmLoading="confirmLoading", @cancel="handleCancel")
     a-form(:form="form")
       a-row(:gutter="24")
-        a-col(v-for="(item, index) in formItem", :key="index", :span="item.col ? item.col : 8")
+        a-col(v-for="(item, index) in basicPanel.formItem", :key="index", :span="item.col ? item.col : 8")
           a-form-item(:label="item.lbl", :label-col="{ span: item.labelCol ? item.labelCol : 7 }", :wrapper-col="{ span: (24 - (item.labelCol ? item.labelCol : 7)) }")            
             a-select(v-decorator="item.decorator", showSearch, v-if="item.type == 'select'")
               a-select-option(v-for="(sItem, index) in item.list", :value="sItem.code", :key="index") {{sItem.name}}
@@ -55,45 +60,23 @@ const showTotalTemplate = (total) => {
 export default {
   // layout: 'backend',
   props: {
-    leftSider: {
+    basicPanel: {
       type: Object,
-      default: null
-    },
-    buttonGroup: {
-      type: Array,
-      default: null
-    },
-    columns: {
-      type: Array,
       required: true
-    },
-    data: {
-      type: Array,
-      default: null
     },    
     cb: {
       type: Function,
       required: true
     },
-    formItem: {
-      type: Array,
-      default: null
-    },
-    panelScroll: {
-      type: Object,
-      default: null
-    },
     total: {
       type: Number,
       default: 0
-    },
-    rowKey: {
-      type: String,
-      default: null
     }
   },
   data () {    
     return {
+      editCol: '',
+      editIdx: null,
       delConfirmShow: false,
       scroll: { x: 0, y: 600 },
       alertShow: false,
@@ -115,27 +98,40 @@ export default {
       },      
       collapsed: false,
       selectedRowKeys: [],
-      selectedRows: []      
+      selectedRows: [],
+      dataIndexList: []  
     }
   },
   beforeMount() {
     console.log('org form:>>.', this.$form)
     this.form = this.$form.createForm(this)
     this.pagination.total = this.total
+    const dataIndexList = []
+    this.basicPanel.columns.map((item) => {
+      const customRender = item.dataIndex
+      dataIndexList.push(customRender)
+      // item.edit = false
+      item.scopedSlots = {}
+      item.scopedSlots.customRender = customRender
+    })
+    console.log(dataIndexList)
+    this.dataIndexList = dataIndexList
   },
   mounted() {
     this.$nextTick(() => {
-      if (!this.panelScroll) {
-        this.columns.map((item) => {
+      if (!this.basicPanel.panelScroll) {
+        this.basicPanel.columns.map((item) => {
           this.scroll.x += item.width
         })
-        if (this.scroll.x < this.$refs.content.clientWeight) {
-          this.scroll.x = this.$refs.content.clientWeight
-        }
-        // this.scroll.x = this.scroll.x - 62
         console.log('scroll.x:'+this.scroll.x)
+        if (this.scroll.x < this.$refs.content.offsetWidth) {
+          this.scroll.x = this.$refs.content.offsetWidth
+          // delete this.scroll.x
+        }
+        // this.scroll.x = this.scroll.x - 62        
+        console.log(this.$refs.content.offsetWidth)
       }      
-      this.scroll.y = (this.$refs.content.clientHeight - 104)
+      this.scroll.y = (this.$refs.content.offsetHeight - 104)
       this.$forceUpdate()
     })
   },
@@ -220,13 +216,28 @@ export default {
     },
     onDateChange (val) {
       console.log(val)
+    },
+    tableClick (text, record, index) {
+      const me = this
+      if (me.basicPanel.rowSelection.type === 'radio') {
+        this.selectedRowKeys = [record[me.basicPanel.rowKey]]
+        this.selectedRows = [record]
+      } else {
+        this.selectedRowKeys.push(record[me.basicPanel.rowKey])
+        this.selectedRows.push(record)
+      }
+    },
+    dbTableClick (col, record, index) {
+      console.log('---------1')
+      this.editCol = col
+      this.editIdx = index
     }
   }
 }
 </script>
 <style>
 .sider-content-height{
- height: calc(100vh - 40px) 
+ height: calc(100vh - 142px) 
 }
 .box-sizing {
   box-sizing: border-box
