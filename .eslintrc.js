@@ -19,8 +19,8 @@ module.exports = {
   ],
   // add your custom rules here
   rules: {
-    // 'nuxt/no-cjs-in-config': 'off',
-    // 'prettier/prettier': 'off',
+    'nuxt/no-cjs-in-config': 'off',
+    'prettier/prettier': 'off',
     // 'linebreak-style': 'off',
     'linebreak-style': [2, 'unix'],
     'no-console': 'off'
