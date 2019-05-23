@@ -36,10 +36,10 @@ a-layout
     .content.mt-15(ref="content")
       a-table(size="small", :scroll="basicPanel.panelScroll ? basicPanel.panelScroll : scroll", :rowSelection="{type: basicPanel.rowSelection.type, columnWidth:40, fixed:true, selectedRowKeys: selectedRowKeys, onChange: onSelectChange}", :pagination="pagination" :columns="basicPanel.columns", :dataSource="basicPanel.data", bordered, :rowKey="basicPanel.rowKey")      
         template(v-for="col in dataIndexList", :slot="col", slot-scope="text, record, index")
-          div(:key="col")
-            a-input(:value="text", style="margin: -5px 0", v-if="editCol === col && editIdx === index")
+          .full-width(:key="col")
+            a-input(:value="text", v-model="record[col]", style="margin: -5px 0", v-if="editCol === col && editIdx === index", @change="e => handleChange(e.target.value, record.key, col)")
             template(v-else) 
-              .full-width(@click="tableClick(text, record, index)", @dblclick="dbTableClick(col, record, index)") {{text}}
+              .full-width(@click="tableClick(text, record, index)", @dblclick="dbTableClick(col, record, index)") {{text ? text : '-'}}
       //- a-pagination.mt-10(:itemRender="itemRender", :defaultCurrent="pagination.current", :defaultPageSize="pagination.pageSize", showSizeChanger, showQuickJumper, :total="pagination.total", :showTotal="total => `共 ${total} 条数据`")
   a-modal(:title="titleModal", :width="1100", :visible="modalShow", @ok="handleOk", :confirmLoading="confirmLoading", @cancel="handleCancel")
     a-form(:form="form")
@@ -231,6 +231,14 @@ export default {
       console.log('---------1')
       this.editCol = col
       this.editIdx = index
+    },
+    handleChange (value, key, column) {
+      const newData = [...this.basicPanel.data]
+      const target = newData.filter(item => key === item.key)[0]
+      if (target) {
+        target[column] = value
+        this.basicPanel.data = newData
+      }
     }
   }
 }
