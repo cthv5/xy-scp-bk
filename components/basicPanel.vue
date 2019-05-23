@@ -49,8 +49,8 @@ a-layout
             a-input(v-decorator="item.decorator", v-else)
 </template>
 <script>
-const showTotalTemplate = (total) => {
-  return '共' + total+ '条数据'
+const showTotalTemplate = total => {
+  return '共' + total + '条数据'
 }
 export default {
   // layout: 'backend',
@@ -70,7 +70,7 @@ export default {
     data: {
       type: Array,
       default: null
-    },    
+    },
     cb: {
       type: Function,
       required: true
@@ -92,14 +92,14 @@ export default {
       default: null
     }
   },
-  data () {    
+  data() {
     return {
       delConfirmShow: false,
       scroll: { x: 0, y: 600 },
       alertShow: false,
       titleModal: '新增机构',
       modalShow: false,
-      formLayout: 'horizontal',      
+      formLayout: 'horizontal',
       form: null,
       confirmLoading: false,
       pagination: {
@@ -112,10 +112,10 @@ export default {
         showQuickJumper: true,
         hideOnSinglePage: true,
         showTotal: showTotalTemplate
-      },      
+      },
       collapsed: false,
       selectedRowKeys: [],
-      selectedRows: []      
+      selectedRows: []
     }
   },
   beforeMount() {
@@ -126,22 +126,22 @@ export default {
   mounted() {
     this.$nextTick(() => {
       if (!this.panelScroll) {
-        this.columns.map((item) => {
+        this.columns.map(item => {
           this.scroll.x += item.width
         })
         if (this.scroll.x < this.$refs.content.clientWeight) {
           this.scroll.x = this.$refs.content.clientWeight
         }
         // this.scroll.x = this.scroll.x - 62
-        console.log('scroll.x:'+this.scroll.x)
-      }      
-      this.scroll.y = (this.$refs.content.clientHeight - 104)
+        console.log('scroll.x:' + this.scroll.x)
+      }
+      this.scroll.y = this.$refs.content.clientHeight - 104
       this.$forceUpdate()
     })
   },
   methods: {
-    onSelectChange (selectedRowKeys, selectedRows) {
-      console.log('selectedRowKeys changed: ', selectedRowKeys);
+    onSelectChange(selectedRowKeys, selectedRows) {
+      console.log('selectedRowKeys changed: ', selectedRowKeys)
       console.log(selectedRows)
       this.selectedRowKeys = selectedRowKeys
       this.selectedRows = selectedRows
@@ -149,22 +149,22 @@ export default {
     collapsedHandler() {
       this.collapsed = !this.collapsed
     },
-    onSelect (keys) {
-      console.log('Trigger Select', keys);
+    onSelect(keys) {
+      console.log('Trigger Select', keys)
     },
-    onExpand () {
-      console.log('Trigger Expand');
+    onExpand() {
+      console.log('Trigger Expand')
     },
-    showModal(item) { 
+    showModal(item) {
       switch (item.type) {
         case 'edit':
           if (this.selectedRowKeys.length > 0) {
             this.modalShow = true
             const formVal = this.selectedRows[0]
             console.log(formVal)
-            setTimeout(()=> {
+            setTimeout(() => {
               this.form.setFieldsValue(formVal)
-            }, 100) 
+            }, 100)
           } else {
             this.$message.warning('请选择需要操作的数据')
             return false
@@ -176,7 +176,7 @@ export default {
           this.modalShow = true
           break
         case 'del':
-          if (this.selectedRowKeys.length > 0) {          
+          if (this.selectedRowKeys.length > 0) {
             this.delConfirmShow = true
           } else {
             this.$message.warning('请选择需要删除的数据')
@@ -185,55 +185,53 @@ export default {
         case 'reload':
           console.log('reload')
           break
-      }   
+      }
     },
     handleOk(e) {
-      e.preventDefault() 
+      e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          this.confirmLoading = true;
+          this.confirmLoading = true
           setTimeout(() => {
-            this.modalShow = false;
-            this.confirmLoading = false;
-          }, 2000);          
+            this.modalShow = false
+            this.confirmLoading = false
+          }, 2000)
           // this.form.getForm()
-          console.log('Received values of form: ', values);
+          console.log('Received values of form: ', values)
         }
-      });
-      // this.ModalText = 'The modal will be closed after two seconds';      
+      })
+      // this.ModalText = 'The modal will be closed after two seconds';
     },
     handleCancel(e) {
       e.preventDefault()
-      console.log('Clicked cancel button')      
+      console.log('Clicked cancel button')
       this.form.resetFields()
       this.modalShow = false
     },
-    confirm (e) {
+    confirm(e) {
       console.log(e)
       this.delConfirmShow = false
       this.cb('edit')
     },
-    cancel (e) {
+    cancel(e) {
       console.log(e)
       this.delConfirmShow = false
       // this.$message.error('Click on No')
     },
-    onDateChange (val) {
+    onDateChange(val) {
       console.log(val)
     }
   }
 }
 </script>
 <style>
-.sider-content-height{
- height: calc(100vh - 40px) 
+.sider-content-height {
+  height: calc(100vh - 40px);
 }
 .box-sizing {
-  box-sizing: border-box
+  box-sizing: border-box;
 }
-.content{
-  height: calc(100vh - 175px)
+.content {
+  height: calc(100vh - 175px);
 }
 </style>
-
-
