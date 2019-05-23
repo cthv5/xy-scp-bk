@@ -1,30 +1,38 @@
 <template lang="pug">
 a-layout
-  //- a-layout-sider.border-right-line.bg-f9(width="250", collapsible, :collapsedWidth="0", v-model="collapsed")
-  //-   .flex.flex-center.p-10
-  //-     .col 公司组织
-  //-     a-icon.trigger(:type="collapsed ? 'menu-unfold' : 'menu-fold'", @click="collapsedHandler")
-  //-   .bg-white.p-10.sider-content-height
-  //-     .flex.flex-center.flex-content-between.mt-10
-  //-       a-button(icon="plus", size="small") 增加
-  //-       a-button(icon="edit", size="small") 修改
-  //-       a-button(icon="delete", size="small") 删除
-  //-     .sider-tree
-  //-       a-directory-tree(multiple, defaultExpandAll, @select="onSelect", @expand="onExpand")
-  //-         a-tree-node(title="集团", key="0-0")
-  //-           a-tree-node(title="leaf 0-0", key="0-0-0")
-  //-             a-tree-node(title="leaf 0-0-0", key="0-0-0-0", isLeaf)
-  //-           a-tree-node(title="leaf 0-0", key="0-0-1", isLeaf)
-  //-         a-tree-node(title="parent 1", key="0-1")
-  //-           a-tree-node(title="leaf 1-0", key="0-1-0", isLeaf)
-  //-           a-tree-node(title="leaf 1-0", key="0-1-1", isLeaf)
+  a-layout-sider.border-right-line.bg-f9(v-if="leftSider", width="250", collapsible, :collapsedWidth="0", v-model="collapsed")
+    .flex.flex-center.p-10
+      .col {{leftSider.title}}
+      a-icon.trigger(:type="collapsed ? 'menu-unfold' : 'menu-fold'", @click="collapsedHandler")
+    .bg-white.p-10.sider-content-height
+      template(v-if="leftSider.type === 'tree'")
+        .flex.flex-center.flex-content-between.mt-10
+          a-button(icon="plus", size="small") 增加
+          a-button(icon="edit", size="small") 修改
+          a-button(icon="delete", size="small") 删除
+        .sider-tree
+          a-directory-tree(multiple, defaultExpandAll, @select="onSelect", @expand="onExpand")
+            a-tree-node(title="集团", key="0-0")
+              a-tree-node(title="leaf 0-0", key="0-0-0")
+                a-tree-node(title="leaf 0-0-0", key="0-0-0-0", isLeaf)
+              a-tree-node(title="leaf 0-0", key="0-0-1", isLeaf)
+            a-tree-node(title="parent 1", key="0-1")
+              a-tree-node(title="leaf 1-0", key="0-1-0", isLeaf)
+              a-tree-node(title="leaf 1-0", key="0-1-1", isLeaf)
+      template(v-else-if="leftSider.type === 'search'")
+        a-form
+          a-form-item(v-for="item in leftSider.formItem", :key="item.lbl", :label="item.lbl", :label-col="item.lblCol ? item.lblCol : {span: 8}", :wrapper-col="item.wrapperCol ? item.wrapperCol : {span: 16}")
+            a-input(:type="item.type ? item.type : 'text'")
+        a-button-group.flex.flex-content-center
+          a-button(type="primary", icon="search") 查询
+          a-button(icon="reload") 重置
   a-layout-content.p-10.bg-white.box-sizing
     .flag-panel(v-if="buttonGroup")
       a-button-group
         template(v-for="item in buttonGroup")
           a-popconfirm(v-if="item.popconfirm", :title="item.popconfirm.title", :visible="delConfirmShow" @confirm="confirm", @cancel="cancel", okText="确认", cancelText="取消")
-            a-button(:icon="item.icon", type="primary", @click="showModal(item.type)") {{item.text}}
-          a-button(v-else, :icon="item.icon", type="primary", @click="showModal(item.type)") {{item.text}}          
+            a-button(:icon="item.icon", type="primary", @click="showModal(item)") {{item.text}}
+          a-button(v-else, :icon="item.icon", type="primary", @click="showModal(item)") {{item.text}}          
     .content.mt-15(ref="content")
       a-table(size="small", :scroll="panelScroll ? panelScroll : scroll", :rowSelection="{type: 'radio', fixed:true, selectedRowKeys: selectedRowKeys, onChange: onSelectChange}", :pagination="pagination" :columns="columns", :dataSource="data", bordered, :rowKey="rowKey")        
       //- a-pagination.mt-10(:itemRender="itemRender", :defaultCurrent="pagination.current", :defaultPageSize="pagination.pageSize", showSizeChanger, showQuickJumper, :total="pagination.total", :showTotal="total => `共 ${total} 条数据`")
@@ -47,6 +55,10 @@ const showTotalTemplate = (total) => {
 export default {
   // layout: 'backend',
   props: {
+    leftSider: {
+      type: Object,
+      default: null
+    },
     buttonGroup: {
       type: Array,
       default: null
@@ -143,8 +155,8 @@ export default {
     onExpand () {
       console.log('Trigger Expand');
     },
-    showModal(flag) { 
-      switch (flag) {
+    showModal(item) { 
+      switch (item.type) {
         case 'edit':
           if (this.selectedRowKeys.length > 0) {
             this.modalShow = true
@@ -156,9 +168,11 @@ export default {
           } else {
             this.$message.warning('请选择需要操作的数据')
             return false
-          }          
+          }
+          this.titleModal = item.text
           break
         case 'add':
+          this.titleModal = '新增'
           this.modalShow = true
           break
         case 'del':

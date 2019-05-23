@@ -1,5 +1,5 @@
 <template lang="pug">
-  basic-panel(:buttonGroup="buttonGroup", :total="1000", :panelScroll="{x: 2000, y: 600}", :columns="columns", :data="tableData", :cb="tableCb", :form="formPanel", :formItem="formItem", :rowKey="'orgCode'")
+  basic-panel(:leftSider="leftSider", :buttonGroup="buttonGroup", :total="1000", :panelScroll="{x: 2000, y: 600}", :columns="columns", :data="tableData", :cb="tableCb", :form="formPanel", :formItem="formItem", :rowKey="'orgCode'")
 </template>
 <script>
 import basicPanel from '@/components/basicPanel'
@@ -10,6 +10,14 @@ export default {
   },
   data () {   
     return {
+      leftSider: {
+        type: 'search',
+        title: '查询',
+        formItem: [
+          {lbl: '机构名称', model: 'orgName', lblCol: {span: 8}, wrapperCol: {span: 16}},
+          {lbl: '机构代码', model: 'orgCode'}          
+        ]
+      },
       formPanel: null,
       buttonGroup: [{
         type: 'add',
