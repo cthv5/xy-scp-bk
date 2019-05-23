@@ -1,0 +1,225 @@
+<template lang="pug">
+a-layout
+  //- a-layout-sider.border-right-line.bg-f9(width="250", collapsible, :collapsedWidth="0", v-model="collapsed")
+  //-   .flex.flex-center.p-10
+  //-     .col 公司组织
+  //-     a-icon.trigger(:type="collapsed ? 'menu-unfold' : 'menu-fold'", @click="collapsedHandler")
+  //-   .bg-white.p-10.sider-content-height
+  //-     .flex.flex-center.flex-content-between.mt-10
+  //-       a-button(icon="plus", size="small") 增加
+  //-       a-button(icon="edit", size="small") 修改
+  //-       a-button(icon="delete", size="small") 删除
+  //-     .sider-tree
+  //-       a-directory-tree(multiple, defaultExpandAll, @select="onSelect", @expand="onExpand")
+  //-         a-tree-node(title="集团", key="0-0")
+  //-           a-tree-node(title="leaf 0-0", key="0-0-0")
+  //-             a-tree-node(title="leaf 0-0-0", key="0-0-0-0", isLeaf)
+  //-           a-tree-node(title="leaf 0-0", key="0-0-1", isLeaf)
+  //-         a-tree-node(title="parent 1", key="0-1")
+  //-           a-tree-node(title="leaf 1-0", key="0-1-0", isLeaf)
+  //-           a-tree-node(title="leaf 1-0", key="0-1-1", isLeaf)
+  a-layout-content.p-10.bg-white.box-sizing
+    .flag-panel(v-if="buttonGroup")
+      a-button-group
+        template(v-for="item in buttonGroup")
+          a-popconfirm(v-if="item.popconfirm", :title="item.popconfirm.title", :visible="delConfirmShow" @confirm="confirm", @cancel="cancel", okText="确认", cancelText="取消")
+            a-button(:icon="item.icon", type="primary", @click="showModal(item.type)") {{item.text}}
+          a-button(v-else, :icon="item.icon", type="primary", @click="showModal(item.type)") {{item.text}}          
+    .content.mt-15(ref="content")
+      a-table(size="small", :scroll="panelScroll ? panelScroll : scroll", :rowSelection="{type: 'radio', fixed:true, selectedRowKeys: selectedRowKeys, onChange: onSelectChange}", :pagination="pagination" :columns="columns", :dataSource="data", bordered, :rowKey="rowKey")        
+      //- a-pagination.mt-10(:itemRender="itemRender", :defaultCurrent="pagination.current", :defaultPageSize="pagination.pageSize", showSizeChanger, showQuickJumper, :total="pagination.total", :showTotal="total => `共 ${total} 条数据`")
+  a-modal(:title="titleModal", :width="1100", :visible="modalShow", @ok="handleOk", :confirmLoading="confirmLoading", @cancel="handleCancel")
+    a-form(:form="form")
+      a-row(:gutter="24")
+        a-col(v-for="(item, index) in formItem", :key="index", :span="item.col ? item.col : 8")
+          a-form-item(:label="item.lbl", :label-col="{ span: item.labelCol ? item.labelCol : 7 }", :wrapper-col="{ span: (24 - (item.labelCol ? item.labelCol : 7)) }")            
+            a-select(v-decorator="item.decorator", showSearch, v-if="item.type == 'select'")
+              a-select-option(v-for="(sItem, index) in item.list", :value="sItem.code", :key="index") {{sItem.name}}
+            a-radio-group(v-else-if="item.type == 'radio'", name="radioGroup", :defaultValue="item.defaultValue")
+              a-radio(v-for="(sItem, index) in item.list", :value="sItem.code", :key="index") {{sItem.name}}
+            a-date-picker(v-else-if="item.type == 'date'", placeholder="请选择日期", @change="onDateChange")
+            a-input(v-decorator="item.decorator", v-else)
+</template>
+<script>
+const showTotalTemplate = (total) => {
+  return '共' + total+ '条数据'
+}
+export default {
+  // layout: 'backend',
+  props: {
+    buttonGroup: {
+      type: Array,
+      default: null
+    },
+    columns: {
+      type: Array,
+      required: true
+    },
+    data: {
+      type: Array,
+      default: null
+    },    
+    cb: {
+      type: Function,
+      required: true
+    },
+    formItem: {
+      type: Array,
+      default: null
+    },
+    panelScroll: {
+      type: Object,
+      default: null
+    },
+    total: {
+      type: Number,
+      default: 0
+    },
+    rowKey: {
+      type: String,
+      default: null
+    }
+  },
+  data () {    
+    return {
+      delConfirmShow: false,
+      scroll: { x: 0, y: 600 },
+      alertShow: false,
+      titleModal: '新增机构',
+      modalShow: false,
+      formLayout: 'horizontal',      
+      form: null,
+      confirmLoading: false,
+      pagination: {
+        // simple: true,
+        size: 'small',
+        defaultCurrent: 1,
+        total: 0,
+        defaultPageSize: 50,
+        showSizeChanger: true,
+        showQuickJumper: true,
+        hideOnSinglePage: true,
+        showTotal: showTotalTemplate
+      },      
+      collapsed: false,
+      selectedRowKeys: [],
+      selectedRows: []      
+    }
+  },
+  beforeMount() {
+    console.log('org form:>>.', this.$form)
+    this.form = this.$form.createForm(this)
+    this.pagination.total = this.total
+  },
+  mounted() {
+    this.$nextTick(() => {
+      if (!this.panelScroll) {
+        this.columns.map((item) => {
+          this.scroll.x += item.width
+        })
+        if (this.scroll.x < this.$refs.content.clientWeight) {
+          this.scroll.x = this.$refs.content.clientWeight
+        }
+        // this.scroll.x = this.scroll.x - 62
+        console.log('scroll.x:'+this.scroll.x)
+      }      
+      this.scroll.y = (this.$refs.content.clientHeight - 104)
+      this.$forceUpdate()
+    })
+  },
+  methods: {
+    onSelectChange (selectedRowKeys, selectedRows) {
+      console.log('selectedRowKeys changed: ', selectedRowKeys);
+      console.log(selectedRows)
+      this.selectedRowKeys = selectedRowKeys
+      this.selectedRows = selectedRows
+    },
+    collapsedHandler() {
+      this.collapsed = !this.collapsed
+    },
+    onSelect (keys) {
+      console.log('Trigger Select', keys);
+    },
+    onExpand () {
+      console.log('Trigger Expand');
+    },
+    showModal(flag) { 
+      switch (flag) {
+        case 'edit':
+          if (this.selectedRowKeys.length > 0) {
+            this.modalShow = true
+            const formVal = this.selectedRows[0]
+            console.log(formVal)
+            setTimeout(()=> {
+              this.form.setFieldsValue(formVal)
+            }, 100) 
+          } else {
+            this.$message.warning('请选择需要操作的数据')
+            return false
+          }          
+          break
+        case 'add':
+          this.modalShow = true
+          break
+        case 'del':
+          if (this.selectedRowKeys.length > 0) {          
+            this.delConfirmShow = true
+          } else {
+            this.$message.warning('请选择需要删除的数据')
+          }
+          break
+        case 'reload':
+          console.log('reload')
+          break
+      }   
+    },
+    handleOk(e) {
+      e.preventDefault() 
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          this.confirmLoading = true;
+          setTimeout(() => {
+            this.modalShow = false;
+            this.confirmLoading = false;
+          }, 2000);          
+          // this.form.getForm()
+          console.log('Received values of form: ', values);
+        }
+      });
+      // this.ModalText = 'The modal will be closed after two seconds';      
+    },
+    handleCancel(e) {
+      e.preventDefault()
+      console.log('Clicked cancel button')      
+      this.form.resetFields()
+      this.modalShow = false
+    },
+    confirm (e) {
+      console.log(e)
+      this.delConfirmShow = false
+      this.cb('edit')
+    },
+    cancel (e) {
+      console.log(e)
+      this.delConfirmShow = false
+      // this.$message.error('Click on No')
+    },
+    onDateChange (val) {
+      console.log(val)
+    }
+  }
+}
+</script>
+<style>
+.sider-content-height{
+ height: calc(100vh - 40px) 
+}
+.box-sizing {
+  box-sizing: border-box
+}
+.content{
+  height: calc(100vh - 175px)
+}
+</style>
+
+

@@ -1,18 +1,12 @@
 <template lang="pug">
 .container
-  div
-    logo
-    h1.title pc-server
-    a-button(type="primary") 123
+  span 1111
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
 
 export default {
-  components: {
-    Logo
-  }
+  layout: 'backend'
 }
 </script>
 
