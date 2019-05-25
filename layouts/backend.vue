@@ -1,8 +1,8 @@
 <template lang="pug">
 no-ssr
-  a-locale-provider(:locale="locale")
-    .server-container
-      .sidebar
+  .server-container
+    .sidebar
+      .side-wrap
         .logo
         .search
         .menu
@@ -15,14 +15,14 @@ no-ssr
                 span(slot="title", :key="menu.key") {{menu.title}}
                 a-menu-item(v-for="sub in menu.children", :key="sub.key")
                   span {{sub.title}}
+    .right-part
       .topbar
         a-tabs.top-tab(v-model="topActiveKey")
           .mr-15(slot="tabBarExtraContent")
             a-button.no-border(size="small", icon="logout") 退出
           a-tab-pane(v-for="p in topPanes", :tab="p.title", :key="p.key")
-        a-tabs.bottom-tab(v-model="activeKey", type="editable-card", @edit="onEdit", :hideAdd="true", size="small", :tabBarGutter="0")
-          a-button.mr-15(slot="tabBarExtraContent", size="small") 清空标签
-          a-tab-pane(v-for="p in panes", :tab="p.title", :key="p.key")
+        el-tabs.bottom-tab(v-model="activeKey", type="card", closable, @edit="onEdit", style="position: relative")
+          el-tab-pane(v-for="p in panes", :label="p.title", :name="p.key", :key="p.key")
       .content
         nuxt
 </template>
@@ -33,19 +33,8 @@ export default {
   data() {
     return {
       locale: zhCN,
-      activeKey: '/basics/InstitutionalSet/organization',
-      text: '123',
+      activeKey: '/basics/InstitutionalSet/department',
       panes: [
-        {
-          url: '/tab2',
-          title: 'tab2',
-          key: '/tab2'
-        },
-        {
-          url: '/tab1',
-          title: 'tab1',
-          key: '/tab1'
-        },
         {
           url: '/basics/InstitutionalSet/organization',
           title: '机构设置',
@@ -91,10 +80,6 @@ export default {
               title: '员工设置'
             }
           ]
-        },
-        {
-          key: '2',
-          title: '测试地址1'
         }
       ]
     }
@@ -109,7 +94,6 @@ export default {
   },
   methods: {
     onEdit(targetKey, action) {
-      this.text = targetKey + '; ' + action
       if (action === 'remove') {
         this.panes = this.panes.filter(itm => itm.key !== targetKey)
         this.activeKey = this.panes[this.panes.length - 1].key

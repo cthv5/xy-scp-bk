@@ -1,4 +1,6 @@
 import Vue from 'vue'
+import httpUtil from '../utils/httpUtil'
+import elemtUtil from '../utils/elemtUtil'
 
 function formatNumber(n) {
   n = n.toString()
@@ -92,6 +94,9 @@ const minixs = {
       }
       return arr
     },
+    showMsg: elemtUtil.showMsg,
+    apiGet: httpUtil.httpGet,
+    apiStreamPost: httpUtil.httpStreamPost,
     request(ctx, config) {
       return ctx.$axios({
         method: 'post',

@@ -1,4 +1,6 @@
 const pkg = require('./package')
+const bodyParser = require('body-parser')
+const session = require('express-session')
 
 module.exports = {
   mode: 'universal',
@@ -24,12 +26,17 @@ module.exports = {
   /*
    ** Global CSS
    */
-  css: ['ant-design-vue/dist/antd.css'],
+  css: ['ant-design-vue/dist/antd.css', 'element-ui/lib/theme-chalk/index.css'],
 
   /*
    ** Plugins to load before mounting the App
    */
-  plugins: [{ src: '@/plugins/antd-ui', ssr: false }, '@/plugins/mixins'],
+  plugins: [
+    { src: '@/plugins/element-ui', ssr: false },
+    { src: '@/plugins/antd-ui', ssr: false },
+    '@/plugins/mixins',
+    { src: '@/plugins/editTable', ssr: false }
+  ],
 
   /*
    ** Nuxt.js modules

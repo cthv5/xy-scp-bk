@@ -14,11 +14,18 @@
     "test": "jest"
   },
   "dependencies": {
-    "cross-env": "^5.2.0",
-    "nuxt": "^2.4.0",
-    "express": "^4.16.4",
+    "@nuxtjs/axios": "^5.3.6",
     "ant-design-vue": "^1.1.10",
-    "@nuxtjs/axios": "^5.3.6"
+    "connect-multiparty": "^2.2.0",
+    "cross-env": "^5.2.0",
+    "element-ui": "^2.8.2",
+    "express": "^4.16.4",
+    "express-session": "^1.16.1",
+    "nuxt": "^2.4.0",
+    "sha1": "^1.1.1",
+    "vue-element-extends": "^1.2.19",
+    "xe-ajax": "^3.5.3",
+    "xe-utils": "^1.8.26"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^0.0.1",
