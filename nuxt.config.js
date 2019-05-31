@@ -17,6 +17,9 @@ module.exports = {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }]
   },
+  server: {
+    host: '0.0.0.0'
+  },
 
   /*
    ** Customize the progress-bar color
@@ -26,14 +29,15 @@ module.exports = {
   /*
    ** Global CSS
    */
-  css: ['ant-design-vue/dist/antd.css', 'element-ui/lib/theme-chalk/index.css'],
+  css: ['element-ui/lib/theme-chalk/index.css'],
 
   /*
    ** Plugins to load before mounting the App
    */
   plugins: [
     { src: '@/plugins/element-ui', ssr: false },
-    { src: '@/plugins/antd-ui', ssr: false },
+    // { src: '@/plugins/antv-g6' },
+    // { src: '@/plugins/antd-ui', ssr: false },
     '@/plugins/mixins',
     { src: '@/plugins/editTable', ssr: false }
   ],

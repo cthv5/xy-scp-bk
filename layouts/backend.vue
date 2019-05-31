@@ -28,11 +28,11 @@ no-ssr
 </template>
 
 <script>
-import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
+// import zhCN from 'ant-design-vue/lib/locale-provider/zh_CN'
 export default {
   data() {
     return {
-      locale: zhCN,
+      // locale: zhCN,
       activeKey: '/basics/InstitutionalSet/department',
       panes: [
         {
@@ -104,5 +104,5 @@ export default {
 </script>
 
 <style lang="stylus">
-@import '../assets/common';
+@import '../assets/stylus/common';
 </style>

@@ -2,6 +2,12 @@ import Vue from 'vue'
 import httpUtil from '../utils/httpUtil'
 import elemtUtil from '../utils/elemtUtil'
 
+if (process.client) {
+  console.log('-------------cccc')
+  window.G6Grid = require('@antv/g6/plugins/grid')
+  window.G6 = require('@antv/g6/lib')
+}
+
 function formatNumber(n) {
   n = n.toString()
   return n[1] ? n : '0' + n
@@ -95,6 +101,7 @@ const minixs = {
       return arr
     },
     showMsg: elemtUtil.showMsg,
+    confirmDialog: elemtUtil.confirmDialog,
     apiGet: httpUtil.httpGet,
     apiStreamPost: httpUtil.httpStreamPost,
     request(ctx, config) {

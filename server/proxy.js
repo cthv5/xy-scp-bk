@@ -9,10 +9,11 @@ const hptl = require('../utils/httpUtil')
 // const proxyUrl = 'http://deploy.thinkingsam.cn/syun-backend-dev/'
 // const proxyUrl = 'http://172.16.120.245:7786/'
 // const proxyUrl = 'http://172.16.16.193:7786/'
-const proxyUrl = 'http://localhost:8901/'
+// const proxyUrl = 'http://localhost:8901/'
 // const proxyUrl = 'http://172.16.120.225:7786/'
 // const proxyUrl = 'http://192.168.20.170:8080/crmserver/'
 // const proxyUrl = 'http://192.168.20.200:8080/crmserver/'
+const proxyUrl = 'http://172.16.120.250:8999/v1/'
 
 router.use((req, res, next) => {
   Object.setPrototypeOf(req, app.request)
@@ -148,10 +149,24 @@ router.post('/common/post', (req, res) => {
   )
 })
 
+router.post('/common/put', (req, res) => {
+  const body = req.body
+  console.log(body)
+  hptl.httpPost(proxyUrl + body.url, body.params).then(
+    ({ data }) => {
+      res.json(data)
+    },
+    err => {
+      console.log(err)
+      res.json({ returnCode: -1, errMsg: '网络异常' })
+    }
+  )
+})
+
 router.post('/common/get', (req, res) => {
   const body = req.body
   console.log('body:>>', body)
-  hptl.httpGet(proxyUrl + body.url).then(
+  hptl.httpGet(encodeURI(proxyUrl +body.url)).then(
     ({ data }) => {
       res.json(data)
     },

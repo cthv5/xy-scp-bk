@@ -14,8 +14,8 @@
     "test": "jest"
   },
   "dependencies": {
+    "@antv/g6": "^3.0.4",
     "@nuxtjs/axios": "^5.3.6",
-    "ant-design-vue": "^1.1.10",
     "connect-multiparty": "^2.2.0",
     "cross-env": "^5.2.0",
     "element-ui": "^2.8.2",

@@ -1,327 +1,277 @@
 <template lang="pug">
-  basic-panel(:total="1000", :cb="tableCb", :basicPanel="basicPanel")
+erplr-panel
+  div(slot="left")
+    slot-left-search(:formItem="searchForm", :searchEvent="searchFun")
+  .content(slot="right")
+    basic-elx-table(
+      :tableValue="tableValue", 
+      :total="total",       
+      :currentPage="currentPage", 
+      :pageSize="pageSize", 
+      :tableDialogFun="tableDialogFun", 
+      @paginateChange="pgChange")
 </template>
 <script>
-import basicPanel from '@/components/basicPanel'
+import erplrPanel from '@/components/erplrPanel'
+import basicElxTable from '@/components/basicElxTable'
+import slotLeftSearch from '@/components/slotLeftSearch'
 export default {
   layout: 'backend',
   components: {
-    basicPanel
+    erplrPanel,
+    basicElxTable,
+    slotLeftSearch
   },
   data() {
+    const remoteMethod = () => {
+      console.log('----------------remoteMethod')
+    }
     return {
-      basicPanel: {
-        rowKey: 'memberCode',
-        leftSider: {
-          type: 'search',
-          title: '查询',
-          formItem: [
-            {
-              lbl: '姓名',
-              model: 'employeeName',
-              lblCol: { span: 4 },
-              wrapperCol: { span: 20 }
-            },
-            {
-              lbl: '代码',
-              model: 'employeeCode',
-              lblCol: { span: 4 },
-              wrapperCol: { span: 20 }
+      total: 0,
+      currentPage: 1,
+      pageSize: 15,
+      tableValue: {
+        topBtns: [],
+        editForm: [
+          {lbl: '姓名', prop: 'employeeName', rules: [{required: true, message: '请输入部门名称', trigger: 'blur'}]},
+          {lbl: '机构', prop: 'orgName', type: 'select', select: {            
+            filterable: true,
+            remote: true,
+            reserveKeyword: true,
+            placeholder:"请输入机构名称",
+            remoteMethod: remoteMethod,
+            list: [],
+            labelProp: '',
+            valueProp: ''
+          }},
+          {lbl: '部门', prop: 'deptName'},
+          {lbl: '职位', prop: 'employeeJob'},
+          {lbl: '类别', prop: 'employeeClass'},
+          {lbl: '性别', prop: 'employeeSex', type: 'select', select: {
+              list: [                
+                { name: '男'},
+                { name: '女'}
+              ],
+              labelProp: 'name',
+              valueProp: 'name'
             }
-          ]
-        },
-        rowSelection: { type: 'radio' },
-        buttonGroup: [
-          { type: 'add', icon: 'plus', text: '增加' },
-          { type: 'edit', icon: 'edit', text: '编辑' },
-          {
-            type: 'del',
-            icon: 'delete',
-            text: '删除',
-            popconfirm: { title: '确认删除？' }
           },
-          { type: 'reload', icon: 'reload', text: '刷新' }
+          {lbl: '学历', prop: 'employeeDegree', type: 'select', select: {
+              list: [{name: '本科', code: 1},{name: '大专', code: 2}],
+              labelProp: 'name',
+              valueProp: 'name'
+            }
+          },
+          {lbl: '专业', prop: 'employeeSpecialty'},
+          {lbl: '身份证号码', prop: 'employeeIdcard'},
+          {lbl: '地址', prop: 'employeeAddr'},
+          {lbl: '电话', prop: 'employeePhone'},
+          {lbl: '手机', prop: 'employeeMobile'},
+          {lbl: '邮箱', prop: 'employeeEmail'},
+          {lbl: '职称', prop: 'employeeTechnical'},
+          {lbl: '民族', prop: 'employeeNation'},
+          {lbl: '政治面貌', prop: 'employeeParty'},
+          {lbl: '籍贯', prop: 'employeeNative'},
+          {lbl: '婚姻', prop: 'employeeMarriage', type: 'select', select: {
+              list: [                
+                { name: '未婚', code: 1 },
+                { name: '已婚', code: 2 },
+                { name: '离婚', code: 3 },
+                { name: '丧偶', code: 4 },
+              ],
+              labelProp: 'name',
+              valueProp: 'name'
+            }
+          },
+          {lbl: '出生日期', prop: 'employeeBirthday', type: 'date'},
+          {lbl: '进公司时间', prop: 'employeeJoindate', type: 'date'},
+          {lbl: '工作组', prop: 'workgroupName'},
+          {lbl: '备注', prop: 'employeeRemark'}
         ],
-        columns: [
-          {
-            title: '姓名',
-            dataIndex: 'employeeName',
-            key: 'employeeName',
-            width: 350
-          },
-          {
-            title: '代码',
-            dataIndex: 'memberCode',
-            key: 'memberCode',
-            width: 150
-          },
-          {
-            title: '是否启用',
-            dataIndex: 'employeeState',
-            key: 'employeeState',
-            width: 150
-          },
-          { title: '机构', key: 'orgName', dataIndex: 'orgName', width: 150 },
-          { title: '部门', key: 'deptName', dataIndex: 'deptName', width: 200 },
-          {
-            title: '工作组',
-            dataIndex: 'workgroupName',
-            key: 'workgroupName',
-            width: 200
-          },
-          {
-            title: '职位',
-            dataIndex: 'employeeJob',
-            key: 'employeeJob',
-            width: 150
-          },
-          {
-            title: '类别',
-            dataIndex: 'employeeClass',
-            key: 'orgBankname',
-            width: 150
-          },
-          {
-            title: '性别',
-            dataIndex: 'employeeSex',
-            key: 'employeeSex',
-            width: 150
-          },
-          {
-            title: '学历2',
-            dataIndex: 'employeeDegree',
-            key: 'employeeDegree',
-            width: 150
-          },
-          {
-            title: '专业',
-            dataIndex: 'employeeSpecialty',
-            key: 'employeeSpecialty',
-            width: 150
-          },
-          {
-            title: '身份证号',
-            dataIndex: 'employeeIdcard',
-            key: 'employeeIdcard',
-            width: 150
-          },
-          {
-            title: '地址',
-            dataIndex: 'employeeAddr',
-            key: 'employeeAddr',
-            width: 150
-          },
-          {
-            title: '电话',
-            dataIndex: 'employeePhone',
-            key: 'employeePhone',
-            width: 150
-          },
-          {
-            title: '手机',
-            dataIndex: 'employeeMobile',
-            key: 'employeeMobile',
-            width: 150
-          },
-          {
-            title: '邮箱',
-            dataIndex: 'employeeEmail',
-            key: 'employeeEmail',
-            width: 150
-          },
-          {
-            title: '职称',
-            dataIndex: 'employeeTechnical',
-            key: 'employeeTechnical',
-            width: 150
-          },
-          {
-            title: '民族',
-            dataIndex: 'employeeNation',
-            key: 'employeeNation',
-            width: 150
-          },
-          {
-            title: '政治面貌',
-            dataIndex: 'employeeParty',
-            key: 'employeeParty',
-            width: 150
-          },
-          {
-            title: '籍贯',
-            dataIndex: 'employeeNative',
-            key: 'employeeNative',
-            width: 150
-          },
-          {
-            title: '婚姻',
-            dataIndex: 'employeeMarriage',
-            key: 'employeeMarriage',
-            width: 150
-          },
-          {
-            title: '出生日期',
-            dataIndex: 'employeeBirthday',
-            key: 'employeeBirthday',
-            width: 150,
-            type: 'date'
-          },
-          {
-            title: '进公司时间',
-            dataIndex: 'employeeJoindate',
-            key: 'employeeJoindate',
-            width: 150
-          },
-          {
-            title: '备注',
-            dataIndex: 'employeeRemark',
-            key: 'orgRemark',
-            width: 150
-          }
+        dialogModel: {
+          employeeName: '', 
+          orgName: '', 
+          deptName:'', 
+          employeeJob: '', 
+          employeeClass: '', 
+          employeeSex: '', 
+          employeeDegree: '', 
+          employeeSpecialty: '', 
+          employeeIdcard: '', 
+          employeeAddr: '',
+          employeePhone: '',
+          employeeMobile: '',
+          employeeEmail: '',
+          employeeTechnical: '',
+          employeeNation: '',
+          employeeParty: '',
+          employeeNative: '',
+          employeeMarriage: '',
+          employeeBirthday: '',
+          employeeJoindate: '',
+          workgroupName: '',
+          employeeRemark: ''},
+        hasCbx: true,
+        showRowIndex: true,
+        validRules: {},
+        tableHead: [
+          {lbl: '姓名', prop: 'employeeName'},
+          {lbl: '代码', prop: 'memberCode'},
+          {lbl: '是否启用',  prop: 'employeeState', formatter: (row, column, cellValue, index) => {
+            return cellValue === 1 ? '停用' : '启用'
+          }},
+          {lbl: '机构', prop: 'orgName'},
+          {lbl: '部门', prop: 'deptName'},
+          {lbl: '工作组', prop: 'workgroupName'},
+          {lbl: '职位', prop: 'employeeJob'},
+          {lbl: '类别', prop: 'employeeClass'},
+          {lbl: '性别', prop: 'employeeSex'},
+          {lbl: '学历', prop: 'employeeDegree'},
+          {lbl: '专业', prop: 'employeeSpecialty'},
+          {lbl: '身份证号', prop: 'employeeIdcard'},
+          {lbl: '地址', prop: 'employeeAddr'},
+          {lbl: '电话', prop: 'employeePhone'},
+          {lbl: '手机', prop: 'employeeMobile'},
+          {lbl: '邮箱', prop: 'employeeEmail'},
+          {lbl: '职称', prop: 'employeeTechnical'},
+          {lbl: '民族', prop: 'employeeNation'},
+          {lbl: '政治面貌', prop: 'employeeParty'},
+          {lbl: '籍贯', prop: 'employeeNative'},
+          {lbl: '婚姻', prop: 'employeeMarriage'},
+          {lbl: '出生日期', prop: 'employeeBirthday', width: '100', formatter: (row, column, cellValue, index) => {
+            return cellValue ?  this.date2Str(new Date(cellValue)) : null
+          }},
+          {lbl: '进公司时间', prop: 'employeeJoindate', width: '100', formatter: (row, column, cellValue, index) => {
+            return cellValue ?  this.date2Str(new Date(cellValue)) : null
+          }},
+          {lbl: '备注', prop: 'employeeRemark'}
         ],
-        data: [
-          {
-            edit: false,
-            deptCode: '000003',
-            deptName: '财务部',
-            employeeAddr: null,
-            employeeBirthday: '',
-            employeeClass: null,
-            employeeCode: '000407',
-            employeeDegree: null,
-            employeeEmail: null,
-            employeeId: 619,
-            employeeIdcard: null,
-            employeeJob: null,
-            employeeJoindate: null,
-            employeeJoindateStr: '',
-            employeeMarriage: 1,
-            employeeMarriageStr: '未婚',
-            employeeMobile: null,
-            employeeName: '沈超财务',
-            employeeNation: null,
-            employeeNative: null,
-            employeeParty: null,
-            employeePhone: null,
-            employeeRemark: null,
-            employeeSex: '男',
-            employeeSpecialty: null,
-            employeeState: 0,
-            employeeStateStr: '是',
-            employeeTechnical: null,
-            memberCode: '00000001',
-            orgCode: '000000',
-            orgName: '智恒达',
-            workgroupCode: null,
-            workgroupName: null
-          },
-          {
-            edit: false,
-            deptCode: '000004',
-            deptName: '财务部',
-            employeeAddr: null,
-            employeeBirthday: '',
-            employeeClass: null,
-            employeeCode: '000408',
-            employeeDegree: null,
-            employeeEmail: null,
-            employeeId: 619,
-            employeeIdcard: null,
-            employeeJob: null,
-            employeeJoindate: null,
-            employeeJoindateStr: '',
-            employeeMarriage: 1,
-            employeeMarriageStr: '未婚',
-            employeeMobile: null,
-            employeeName: '沈超财务',
-            employeeNation: null,
-            employeeNative: null,
-            employeeParty: null,
-            employeePhone: null,
-            employeeRemark: null,
-            employeeSex: '男',
-            employeeSpecialty: null,
-            employeeState: 0,
-            employeeStateStr: '是',
-            employeeTechnical: null,
-            memberCode: '00000002',
-            orgCode: '000000',
-            orgName: '智恒达',
-            workgroupCode: null,
-            workgroupName: null
-          }
-        ],
-        formItem: [
-          {
-            lbl: '姓名',
-            decorator: [
-              'orgName',
-              { rules: [{ required: true, message: '请输入机构名称' }] }
-            ],
-            type: 'text'
-          },
-          { lbl: '机构', decorator: ['orgName'], type: 'select', list: [] },
-          { lbl: '部门', decorator: ['deptName'], type: 'select', list: [] },
-          { lbl: '职位', decorator: ['employeeJob'], type: 'select', list: [] },
-          {
-            lbl: '类别',
-            decorator: ['employeeClass'],
-            type: 'select',
-            list: []
-          },
-          {
-            lbl: '性别',
-            decorator: ['employeeSex'],
-            type: 'radio',
-            list: [{ name: '男', code: 0 }, { name: '女', code: 1 }],
-            defaultValue: 0
-          },
-          {
-            lbl: '学历',
-            decorator: ['employeeDegree'],
-            type: 'select',
-            list: []
-          },
-          { lbl: '专业', decorator: ['employeeSpecialty'] },
-          { lbl: '身份证号码', decorator: ['employeeIdcard'] },
-          { lbl: '地址', decorator: ['employeeAddr'] },
-          { lbl: '电话', decorator: ['employeePhone'] },
-          { lbl: '手机', decorator: ['employeeMobile'] },
-          { lbl: '邮箱', decorator: ['employeeEmail'] },
-          { lbl: '职称', decorator: ['employeeTechnical'] },
-          { lbl: '民族', decorator: ['employeeNation'] },
-          { lbl: '政治面貌', decorator: ['employeeParty'] },
-          { lbl: '籍贯', decorator: ['employeeNative'] },
-          {
-            lbl: '婚姻',
-            decorator: ['employeeMarriage'],
-            type: 'select',
-            list: [
-              { name: '离婚', code: 2 },
-              { name: '已婚', code: 1 },
-              { name: '未婚', code: 0 }
-            ],
-            defaultValue: 0
-          },
-          { lbl: '出生日期', decorator: ['employeeBirthday'], type: 'date' },
-          { lbl: '进公司时间', decorator: ['employeeJoindate'], type: 'date' },
-          { lbl: '工作组', decorator: ['workgroupName'] },
-          {
-            lbl: '备注',
-            decorator: ['employeeRemark'],
-            type: 'textarea',
-            col: 24,
-            labelCol: 2
-          }
-        ]
+        tableData: []
       },
-      formPanel: null
+      searchForm: {
+        form: [
+          {lbl: '姓名', prop: 'employeeName'},
+          {lbl: '代码', prop: 'employeeCode'},
+        ],
+        model: {employeeName: '', employeeCode: ''}
+      }
     }
   },
-  mounted() {},
+  beforeMount() {
+    this.tableValue.topBtns = [
+      {type: 'create'},
+      {type: 'edit'},
+      {type: 'del', handler: this.delTable()},
+      {type: 'refresh', handler: this.refresh()}
+    ]
+  },
+  mounted () {
+    this.loadDptData()
+  },
   methods: {
-    tableCb(type) {
-      this.$message.success('删除成功')
+    async loadDptData() {
+      try {
+        const { data } = await this.apiStreamPost('/proxy/common/get', {
+          url:
+            'basicInfo/emp?currentPage=' +
+            this.currentPage +
+            '&pageSize=' +
+            this.pageSize
+        })
+        if (data.return_code === 0) {
+          this.dptList = data.list          
+          this.tableValue.tableData = data.list
+          this.total = data.total
+        }
+      } catch (e) {
+        console.error(e)
+      }
+    },
+    async save(row) {
+      try {
+        let proxy = '/proxy/common/post'
+        if (row.id && row.id > 0) {
+          delete row.updateAt
+          delete row.createAt
+          proxy = '/proxy/common/put'
+        }              
+        const { data } = await this.apiStreamPost(proxy, {url: 'basicInfo/emp', params: row})
+        debugger
+        console.log('-save', row)
+        if (data.return_code === 0) {
+          if (row.empId && row.empId > 0) this.$message.success('更新成功')
+          else this.$message.success('新增成功')
+          this.currentPage = 1
+          this.loadDptData()
+        } else {
+          this.$message.error(data.message)
+        }
+      } catch (e) {
+        console.log(e)
+      }
+    },
+    pgChange(val) {
+      this.currentPage = val
+      this.loadDptData()
+    },    
+    tableDialogFun(row) {
+      console.log(row)
+      for (let key in row) {
+        if (!row[key]) {
+          delete row[key]
+        }
+      }
+      this.save(row)
+      return true
+    },
+    async delTableRow (params) {
+      try {        
+        const { data } = await this.apiStreamPost('/proxy/common/del', {url: 'basicInfo/emp' + params})
+        if (data.return_code === 0) {
+          this.currentPage = 1
+          this.loadDptData()
+          this.$message.success('删除成功')
+        }
+      } catch(e) {
+        console.error(e)
+      }
+    },
+    delTable() {
+      return (list) => {
+        let params = '/' + list[0].empId
+        if (list.length > 1) {
+          let spIds = []
+          list.map((item) => {
+            spIds.push('spIds[]=' + item.empId)
+          })
+          const spIdsStr = spIds.toString().replace(/,/g, '&')
+          params = '?' + encodeURI(spIdsStr)
+        }
+        this.delTableRow(params)
+      }      
+    },
+    refresh () {
+      return () => {
+        this.currentPage = 1
+        this.loadDptData()
+        return true
+      }
+    },
+    selectRowFun(row, column, event) {
+      console.log('-----------selectRowFun')
+      return true
+    },
+    async searchFun (form) {
+      console.log('--------------val')
+      this.currentPage = 1
+      console.log(form.model.deptCode)
+      let params = ''
+      for (let key in form.model) {
+        if (form.model[key]) {
+          params += '&' + key + '=' + form.model[key]
+        }
+      }      
+      this.loadDptData(params)
     }
   }
 }

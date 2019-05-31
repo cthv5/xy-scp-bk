@@ -1,29 +1,27 @@
 <template lang="pug">
 erplr-panel
   div(slot="left")
-    .padding.bg-container 查询
-    el-form.padding(inline)
-      el-form-item(label="名称")
-        el-input(size="small")
-      el-form-item(label="编号")
-        el-input(size="small")
-      el-form-item.full-width.text-center
-        el-button-group
-          el-button(type="primary", size="small") 搜索
-          el-button(size="small") 重置
+    slot-left-search(:formItem="searchForm", :searchEvent="searchFun")
   .content(slot="right")
-    edit-table(:tableValue="tableValue", :total="total", @rowEditInfo="cellEdit", :currentPage="currentPage", :pageSize="pageSize", @paginateChange="pgChange")
+    basic-elx-table(
+      :tableValue="tableValue", 
+      :total="total",       
+      :currentPage="currentPage", 
+      :pageSize="pageSize", 
+      :tableDialogFun="tableDialogFun", 
+      :selectRowFun = "selectRowFun",
+      @paginateChange="pgChange")
 </template>
 <script>
-import basicPanel from '@/components/basicPanel'
 import erplrPanel from '@/components/erplrPanel'
-import editTable from '@/components/editTable'
+import basicElxTable from '@/components/basicElxTable'
+import slotLeftSearch from '@/components/slotLeftSearch'
 export default {
   layout: 'backend',
   components: {
-    basicPanel,
     erplrPanel,
-    editTable
+    basicElxTable,
+    slotLeftSearch
   },
   data() {
     return {
@@ -31,19 +29,18 @@ export default {
       dptList: [],
       total: 0,
       currentPage: 1,
-      pageSize: 5,
+      pageSize: 15,
       tableValue: {
-        topBtns: [
-          {
-            type: 'create'
-          },
-          {
-            type: 'del'
-          },
-          {
-            type: 'refresh'
-          }
+        topBtns: [],
+        editForm: [
+          {lbl: '部门名称', prop: 'deptName', rules: [{required: true, message: '请输入部门名称', trigger: 'blur'}]},
+          {lbl: '负责人', prop: 'deptManager'},
+          // {lbl: '统计部门', prop: 'deptTjname'},
+          // {lbl: '销售统计部门', prop: 'deptSale'},
+          // {lbl: '状态', prop: 'deptState'},
+          {lbl: '备注', prop: 'deptRemark'},
         ],
+        dialogModel: {deptName: '', deptManager: '', deptRemark: ''},
         hasCbx: true,
         showRowIndex: true,
         validRules: {
@@ -52,145 +49,46 @@ export default {
           memberCode: [{ required: true, message: '不能为空', trigger: 'blur' }]
         },
         tableHead: [
-          {
-            lbl: '编号',
-            prop: 'code'
-          },
-          {
-            lbl: '名称',
-            prop: 'name'
-          },
-          {
-            lbl: '集团编号',
-            prop: 'memberCode'
-          }
-        ]
+          {lbl: '部门代码', prop: 'deptCode'},
+          {lbl: '部门名称', prop: 'deptName'},
+          {lbl: '负责人',  prop: 'deptManager'},
+          // {lbl: '统计部门', prop: 'deptTjname'},
+          // {lbl: '销售统计部门', prop: 'deptSale'},
+          // {lbl: '状态', prop: 'deptState'},
+          {lbl: '备注', prop: 'deptRemark'}
+        ],
+        tableData: []
       },
-      basicPanel: {
-        rowKey: 'deptCode',
-        leftSider: {
-          type: 'search',
-          title: '查询',
-          formItem: [
-            { lbl: '部门名称', model: 'deptName' },
-            { lbl: '部门代码', model: 'deptCode' }
-          ]
-        },
-        rowSelection: { type: 'radio' },
-        buttonGroup: [
-          { type: 'add', icon: 'plus', text: '增加' },
-          { type: 'edit', icon: 'edit', text: '编辑' },
-          {
-            type: 'del',
-            icon: 'delete',
-            text: '删除',
-            popconfirm: { title: '确认删除？' }
-          },
-          { type: 'reload', icon: 'reload', text: '刷新' }
+      searchForm: {
+        form: [
+          {lbl: '部门名称', prop: 'deptName'},
+          {lbl: '部门代码', prop: 'deptCode'},
         ],
-        columns: [
-          { title: '部门名称', dataIndex: 'deptName', key: 'deptName' },
-          {
-            title: '部门代码',
-            dataIndex: 'deptCode',
-            key: 'deptCode',
-            width: 150
-          },
-          {
-            title: '负责人',
-            dataIndex: 'deptManager',
-            key: 'deptManager',
-            width: 150
-          },
-          {
-            title: '统计部门',
-            key: 'deptTjname',
-            dataIndex: 'deptTjname',
-            width: 150
-          },
-          {
-            title: '销售统计部门',
-            key: 'deptSale',
-            dataIndex: 'deptSale',
-            width: 200
-          },
-          {
-            title: '状态',
-            dataIndex: 'deptState',
-            key: 'deptState',
-            width: 80
-          },
-          {
-            title: '备注',
-            dataIndex: 'deptRemark',
-            key: 'deptRemark',
-            width: 350
-          }
-        ],
-        data: [
-          {
-            deptName: '测试部门1',
-            deptCode: '000053',
-            deptManager: '测试部门1',
-            deptTjname: '测试部门',
-            deptSale: '开发一部',
-            deptState: '启用',
-            deptRemark: '-----------1'
-          },
-          {
-            deptName: '测试部门1',
-            deptCode: '000054',
-            deptManager: '测试部门1',
-            deptTjname: '测试部门',
-            deptSale: '开发一部',
-            deptState: '启用',
-            deptRemark: '-----------1'
-          }
-        ],
-        formItem: [
-          {
-            lbl: '部门名称',
-            decorator: [
-              'deptName',
-              { rules: [{ required: true, message: '请输入部门名称' }] }
-            ]
-          },
-          { lbl: '负责人', decorator: ['deptManager'] },
-          { lbl: '统计部门', decorator: ['deptTjname'] },
-          { lbl: '销售统计部门', decorator: ['deptSale'] },
-          { lbl: '状态', decorator: ['deptState'] },
-          {
-            lbl: '备注',
-            decorator: ['deptRemark'],
-            type: 'textarea',
-            col: 24,
-            labelCol: 2
-          }
-        ]
+        model: {deptName: '', deptCode: ''}
       }
     }
   },
   beforeMount() {
+    this.tableValue.topBtns = [
+      {type: 'create'},
+      {type: 'edit'},
+      {type: 'del', handler: this.delTable()},
+      {type: 'refresh', handler: this.refresh()}
+    ]
+  },
+  mounted () {
     this.loadDptData()
   },
   methods: {
-    tableCb(type) {
-      this.$message.success('删除成功')
-    },
-    cellEdit(row) {
-      console.log(row)
-      this.save(row)
-    },
     async save(row) {
       try {
+        let proxy = '/proxy/common/post'
         if (row.id && row.id > 0) {
           delete row.updateAt
           delete row.createAt
-        }
-        const { data } = await this.apiStreamPost('/proxy/common/post', {
-          url: 'basicInfo/dpt',
-          params: row
-        })
+          proxy = '/proxy/common/put'
+        }              
+        const { data } = await this.apiStreamPost(proxy, {url: 'basicInfo/dpt', params: row})
         if (data.return_code === 0) {
           if (row.id && row.id > 0) this.$message.success('更新成功')
           else {
@@ -207,20 +105,19 @@ export default {
       }
     },
     pgChange(val) {
-      console.log(val)
       this.currentPage = val
       this.loadDptData()
     },
-    async loadDptData() {
+    async loadDptData(params) {
       try {
+        if (!params) params = ''
         const { data } = await this.apiStreamPost('/proxy/common/get', {
           url:
             'basicInfo/dpt?currentPage=' +
             this.currentPage +
             '&pageSize=' +
-            this.pageSize
+            this.pageSize + params
         })
-        console.log(data)
         if (data.return_code === 0) {
           this.dptList = data.list
           this.tableValue.tableData = data.list
@@ -230,8 +127,56 @@ export default {
         console.error(e)
       }
     },
-    handleSelectionChange(val) {
-      console.log('val:>>', val)
+    tableDialogFun(row) {         
+      // val.deptCode = '1111'
+      this.save(row)
+      return true
+    },
+    async delDpt (params) {
+      try {        
+        const { data } = await this.apiStreamPost('/proxy/common/del', {url: 'basicInfo/dpt' + params})
+        if (data.return_code === 0) {
+          this.currentPage = 1
+          this.loadDptData()
+          this.$message.success('删除成功')
+        }
+      } catch(e) {
+        console.error(e)
+      }
+    },
+    delTable() {
+      return (list) => {
+        let params = '/' + list[0].deptId
+        if (list.length > 1) {
+          let spIds = []
+          list.map((item) => {
+            spIds.push('spIds[]=' + item.deptId)
+          })
+          const spIdsStr = spIds.toString().replace(/,/g, '&')
+          params = '?' + encodeURI(spIdsStr)
+        }
+        this.delDpt(params)
+      }      
+    },
+    refresh () {
+      return () => {
+        this.loadDptData()
+        return true
+      }
+    },
+    selectRowFun(row, column, event) {
+      console.log('-----------selectRowFun')
+      return true
+    },
+    async searchFun (form) {
+      this.currentPage = 1
+      let params = ''
+      for (let key in form.model) {
+        if (form.model[key]) {
+          params += '&' + key + '=' + form.model[key]
+        }
+      }      
+      this.loadDptData(params)
     }
   }
 }

@@ -8,21 +8,23 @@ module.exports = {
     parser: 'babel-eslint'
   },
   extends: [
-    '@nuxtjs',
-    'plugin:nuxt/recommended',
-    'plugin:prettier/recommended',
-    'prettier',
-    'prettier/vue'
+    // '@nuxtjs',
+    // 'plugin:nuxt/recommended',
+    // 'plugin:prettier/recommended',
+    // 'prettier',
+    // 'prettier/vue'
+    'plugin:vue/essential'
   ],
   plugins: [
-    'prettier'
+    // 'prettier'
+    'vue'
   ],
   // add your custom rules here
   rules: {
     'nuxt/no-cjs-in-config': 'off',
-    // 'prettier/prettier': 'off',
+    'prettier/prettier': 'off',
     // 'linebreak-style': 'off',
-    'linebreak-style': [2, 'unix'],
+    // 'linebreak-style': [2, 'windows'],
     'no-console': 'off'
   }
 }
